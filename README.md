@@ -3,7 +3,10 @@ A Bloom Filter is a probabilistic `HashSet` with two operations, `add` and
 `may_contain`. may_contain can tell if an element is definitely **not** in the
 set or if it **might** be in the set.
 
+Please read the [API documentation on docs.rs](https://docs.rs/bloom-filter-wbj)
+
 ![Travis Status](https://travis-ci.org/wbjohnston/bloom-filter.svg?branch=master)
+[![Crates.io badge](https://img.shields.io/crates/v/bloom-filter-wbj.svg)](https://crates.io/crates/bloom-filter-wbj)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 
