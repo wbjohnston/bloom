@@ -4,7 +4,6 @@ A Bloom Filter is a probabilistic `HashSet` with two operations, `add` and
 set or if it **might** be in the set.
 
 ![Travis Status](https://travis-ci.org/wbjohnston/bloom-filter.svg?branch=master)
-[![Crates.io badge](https://img.shields.io/crates/v/bloom-filter.svg)](https://crates.io/crates/bloom-filter)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 
