@@ -8,9 +8,6 @@ use std::hash::BuildHasher;
 
 use std::collections::hash_map::RandomState;
 
-const DEFAULT_N_BUCKETS: usize = 1024;
-const DEFAULT_N_HASHERS: usize = 2;
-
 /// Calculate the probability of getting a false positive
 ///
 /// # Arguments
@@ -27,6 +24,13 @@ fn false_positive_rate(n_buckets: usize, n_hashers: usize, n_elems: usize)
     (1. - ((-k * n) / m).exp()).powf(k)
 }
 
+fn min_n_buckets(n_elems: usize, fp_rate: f32) -> usize
+{
+    let n = n_elems as f32;
+
+    (-1. * n * fp_rate.ln() / (2f32.ln().powf(2.))).ceil() as usize
+}
+
 /// Calculate the optimal number of hashers
 ///
 /// # Arguments
@@ -37,22 +41,53 @@ fn optimal_n_hashers(n_buckets: usize, n_elems: usize) -> usize
     let n = n_elems as f32;
     let m = n_buckets as f32;
 
-    ((m / n) * 2f32.ln()) as usize
+    ((m / n) * 2f32.ln()).ceil() as usize
 }
 
 /// Space-efficient probabilistic hash set
-#[derive(PartialEq, Eq, Debug)]
-pub struct BloomFilter<H>
-where H: BuildHasher
+#[derive(Debug)]
+pub struct BloomFilter
 {
     buffer: BitVec,
     size: usize,
-    hashers: Vec<H>
+    hashers: Vec<RandomState>
 }
 
-impl<H> BloomFilter<H>
-where H: BuildHasher
+impl BloomFilter
 {
+    /// Build a Bloom Filter with a specified false positive rate
+    ///
+    /// # Arguments
+    /// * `n_elems`: expected number of elements
+    /// * `fp_rate`: desired false positive rate (0.0 -> 1.0)
+    pub fn new_with_fp(n_elems: usize, fp_rate: f32) -> BloomFilter
+    {
+        let min_buckets = min_n_buckets(n_elems, fp_rate);
+        let n_hashers = optimal_n_hashers(min_buckets, n_elems);
+
+        BloomFilter {
+            size: 0,
+            buffer: BitVec::from_elem(min_buckets, false),
+            hashers: (0..n_hashers).map(|_| RandomState::new()).collect()
+        }
+    }
+
+    /// Create a new Bloom Filter with specified buffer size
+    ///
+    /// # Arguments
+    /// * `n_elems`: expected number of elements
+    /// * `size`: desired buffer size
+    pub fn new_with_size(n_elems: usize, size: usize) -> BloomFilter
+    {
+        let n_hashers = optimal_n_hashers(size, n_elems);
+
+        BloomFilter {
+            size: 0,
+            buffer: BitVec::from_elem(size, false),
+            hashers: (0..n_hashers).map(|_| RandomState::new()).collect()
+        }
+    }
+
     /// Add a member
     pub fn add<T>(&mut self, e: &T)
         where T: Hash
@@ -115,22 +150,6 @@ where H: BuildHasher
     }
 }
 
-impl Default for BloomFilter<RandomState>
-{
-    fn default() -> Self
-    {
-        let hashers = (0..DEFAULT_N_HASHERS)
-            .map(|_| RandomState::new())
-            .collect();
-
-        BloomFilter {
-            buffer: BitVec::from_elem(DEFAULT_N_BUCKETS, false),
-            size: 0,
-            hashers: hashers
-        }
-    }
-}
-
 #[cfg(test)]
 mod test
 {
@@ -142,7 +161,7 @@ mod test
     {
         let to_add = "do add this";
         let dont_add = 123;
-        let mut filter = BloomFilter::default();
+        let mut filter = BloomFilter::new_with_size(1, 100);
         filter.add(&to_add);
 
         // Check membership twice to make sure that the results are reproducable
@@ -160,7 +179,7 @@ mod test
     {
         let to_add = "do add this";
 
-        let mut filter = BloomFilter::default();
+        let mut filter = BloomFilter::new_with_size(3, 100);
         filter.add(&to_add);
         filter.add(&to_add);
         filter.add(&to_add);
@@ -171,7 +190,7 @@ mod test
     #[test]
     fn test_fp_rate_is_zero_no_elems()
     {
-        let filter = BloomFilter::default();
+        let filter = BloomFilter::new_with_size(100, 100);
         assert_eq!(0.0, filter.fp_rate());
     }
 }
