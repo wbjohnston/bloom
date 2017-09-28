@@ -1,3 +1,4 @@
+//! A space-efficient, probabilistic data structure
 
 extern crate bit_vec;
 use bit_vec::BitVec;
@@ -26,6 +27,11 @@ fn false_positive_rate(
     (1. - ((-k * n) / m).exp()).powf(k)
 }
 
+/// Minumum number of buckets required to achieve a target false positive rate
+///
+/// # Arguments
+/// * `n_elems`: target number of elements
+/// * `fp_rate`: target false positive rate
 fn min_n_buckets(n_elems: usize, fp_rate: f32) -> usize {
     let n = n_elems as f32;
 
@@ -84,8 +90,11 @@ impl BloomFilter {
         }
     }
 
-    /// Add a member
-    pub fn add<T>(&mut self, e: &T)
+    /// Insert a member
+    ///
+    /// # Arguments
+    /// * `e`: element to add
+    pub fn insert<T>(&mut self, e: &T)
     where
         T: Hash,
     {
@@ -97,6 +106,9 @@ impl BloomFilter {
     }
 
     /// Check membership
+    ///
+    /// # Arguments
+    /// * `e`: element to check membership of
     pub fn may_contain<T>(&self, e: &T) -> bool
     where
         T: Hash,
@@ -155,7 +167,7 @@ mod test {
         let to_add = "do add this";
         let dont_add = 123;
         let mut filter = BloomFilter::new_with_size(1, 100);
-        filter.add(&to_add);
+        filter.insert(&to_add);
 
         // Check membership twice to make sure that the results are reproducable
         // even though the hashers are being reset
@@ -171,9 +183,9 @@ mod test {
         let to_add = "do add this";
 
         let mut filter = BloomFilter::new_with_size(3, 100);
-        filter.add(&to_add);
-        filter.add(&to_add);
-        filter.add(&to_add);
+        filter.insert(&to_add);
+        filter.insert(&to_add);
+        filter.insert(&to_add);
 
         assert_eq!(3, filter.size());
     }
