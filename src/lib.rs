@@ -178,6 +178,23 @@ mod test {
         assert_eq!(false, filter.may_contain(&dont_add));
     }
 
+    /// Test that any element that implements the `Hash` trait can be added to
+    /// the `BloomFilter`
+    #[test]
+    fn test_is_heterogenous() {
+        let a = "do add this";
+        let b = 1234567;
+
+        let mut filter = BloomFilter::new_with_fp(2, 0.01);
+        filter.insert(&a);
+        filter.insert(&b);
+
+        assert!(filter.may_contain(&a));
+        assert!(filter.may_contain(&a));
+        assert!(filter.may_contain(&b));
+        assert!(filter.may_contain(&b));
+    }
+
     #[test]
     fn test_size_increments() {
         let to_add = "do add this";
