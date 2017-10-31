@@ -1,5 +1,5 @@
 [package]
-name        = "bloom-filter-wbj"
+name        = "bloom"
 version     = "0.0.1"
 authors     = ["Will Johnston"]
 
