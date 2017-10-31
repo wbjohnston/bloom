@@ -6,7 +6,7 @@ set or if it **might** be in the set.
 Please read the [Documentation](https://wbjohnston.github.io/bloom)
 
 ![Travis Status](https://travis-ci.org/wbjohnston/bloom.svg?branch=master)
-[![codecov](https://codecov.io/gh/wbjohnston/bloom-filter/branch/master/graph/badge.svg)](https://codecov.io/gh/wbjohnston/bloom-filter)
+[![codecov](https://codecov.io/gh/wbjohnston/bloom/branch/master/graph/badge.svg)](https://codecov.io/gh/wbjohnston/bloom)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 
